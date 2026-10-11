@@ -1,0 +1,4 @@
+const crypto=require('node:crypto');const db=require('./database');const config=require('./config');const sessions=new Map();
+function hash(password){return crypto.scryptSync(password,config.sessionSecret,64).toString('hex');}function verify(password,stored){try{return crypto.timingSafeEqual(Buffer.from(hash(password),'hex'),Buffer.from(stored,'hex'));}catch{return false;}}
+function signIn(email,password){const user=db.getUserByEmail(email);if(!user||!verify(password,user.password_hash))return null;const token=crypto.randomBytes(32).toString('hex');sessions.set(token,{userId:user.id,expires:Date.now()+86400000});return {token,user:db.getUser(user.id)};}function signOut(token){sessions.delete(token);}function userFromToken(token){const session=sessions.get(token);if(!session||session.expires<Date.now()){if(token)sessions.delete(token);return null;}return db.getUser(session.userId);}
+module.exports={hash,signIn,signOut,userFromToken};

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Listings — Seller dashboard — Phyzel Marketplace</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a href="index.html" class="brand" aria-label="Phyzel Marketplace home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z" /><path d="M10 9h4" /><path d="M10 13h4" /></svg>
+        Phyzel Marketplace
+        <small>Ghana-first</small>
+      </a>
+      <nav class="nav" id="mainNav">
+        <a href="index.html">Home</a>
+        <a href="fashion-beauty.html">Fashion &amp; Beauty</a>
+        <a href="food.html">Food</a>
+        <a href="general-trading.html">General Trading</a>
+        <a href="seller-application.html">Become a Seller</a>
+      </nav>
+      <div class="nav-actions">
+        <a href="cart.html" class="cart-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></svg>
+          Cart
+          <span class="count hidden" data-cart-count>0</span>
+        </a>
+        <template id="userMenuTpl">
+          <div class="user-menu">
+            <div class="avatar"><span data-user-initial>U</span></div>
+            <div>
+              <div class="name" data-user-name>User</div>
+              <div class="role" data-user-role>Customer</div>
+            </div>
+            <svg class="caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9" /></svg>
+            <div class="dropdown">
+              <a href="customer-dashboard.html" data-user-link>My account</a>
+              <template id="sellerLinksTpl">
+                <a href="seller-dashboard.html">Seller dashboard</a>
+                <hr class="sep" />
+              </template>
+              <a href="login.html" data-action-logout>Sign out</a>
+            </div>
+          </div>
+        </template>
+        <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="wrap">
+      <div id="sellerListingsRoot"></div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-brand">
+        <div class="brand">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z" /><path d="M10 9h4" /><path d="M10 13h4" /></svg>
+          Phyzel Marketplace
+        </div>
+        <p>A Ghana-first marketplace for fashion, food, and general trading.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Marketplace</h4>
+        <ul>
+          <li><a href="fashion-beauty.html">Fashion &amp; Beauty</a></li>
+          <li><a href="food.html">Food</a></li>
+          <li><a href="general-trading.html">General Trading</a></li>
+          <li><a href="seller-application.html">Become a seller</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Account</h4>
+        <ul>
+          <li><a href="login.html">Sign in</a></li>
+          <li><a href="register.html">Create account</a></li>
+          <li><a href="customer-dashboard.html">My account</a></li>
+          <li><a href="cart.html">Cart</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="#">Contact us</a></li>
+          <li><a href="#">Help center</a></li>
+          <li><a href="#">Delivery info</a></li>
+          <li><a href="#">Returns</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="footer-bottom">
+        <div>&copy; Phyzel Marketplace. All rights reserved.</div>
+        <div class="sample">Sample data for development only</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js" defer></script>
+  <script src="auth.js" defer></script>
+  <script src="seller.js" defer></script>
+  <script>
+    (function () {
+      "use strict";
+      var root = document.getElementById("sellerListingsRoot");
+      if (!root) return;
+
+      window.Phyzel.renderSellerListingsPage = function (root) {
+        var user = window.Phyzel.currentUser();
+        if (!user) {
+          root.innerHTML =
+            '<div class="card" style="max-width:520px;margin:40px auto;padding:30px;text-align:center;">' +
+            '<h2 style="font-size:1.2rem;font-weight:700;margin-bottom:6px;">Sign in required</h2>' +
+            '<p class="text-muted" style="margin-bottom:18px;">Please sign in to manage your listings.</p>' +
+            '<a href="login.html" class="btn btn-primary">Sign in</a>' +
+            "</div>";
+          return;
+        }
+
+        var profile = window.Phyzel.getSellerProfileByUserId(user.user.id);
+        if (!profile || !profile.isApproved || !profile.isActive) {
+          root.innerHTML =
+            '<div class="card" style="max-width:560px;margin:40px auto;padding:30px;text-align:center;">' +
+            '<h2 style="font-size:1.2rem;font-weight:700;margin-bottom:6px;color:var(--color-warning);">Listing access restricted</h2>' +
+            '<p class="text-muted" style="margin-bottom:18px;">You can manage listings only after your seller application is approved.</p>' +
+            '<a href="seller-application.html" class="btn btn-primary">Apply to sell</a>' +
+            '<a href="seller-dashboard.html" class="btn btn-secondary" style="margin-left:10px;">Back to dashboard</a>' +
+            "</div>";
+          return;
+        }
+
+        var listings = window.Phyzel.listListings().filter(function (l) {
+          return l.sellerId === profile.id;
+        });
+
+        var html =
+          '<nav aria-label="Breadcrumb" style="margin-bottom:18px;">' +
+          '<ol style="display:flex;flex-wrap:wrap;gap:6px 10px;font-size:0.85rem;color:var(--color-text-subtle);list-style:none;">' +
+          '<li><a href="index.html" style="color:var(--color-accent);">Home</a></li>' +
+          '<li><span aria-hidden="true">/</span></li>' +
+          '<li><a href="seller-dashboard.html" style="color:var(--color-accent);">Seller dashboard</a></li>' +
+          '<li><span aria-hidden="true">/</span></li>' +
+          '<li>Listings</li>' +
+          '</ol></nav>';
+
+        html +=
+          '<div class="flex flex-between flex-wrap gap-3 mb-2">' +
+          '<div>' +
+          '<h1 class="page-title" style="font-size:1.4rem;">Your listings</h1>' +
+          '<p class="text-muted">Manage products for ' +
+          window.Phyzel.escapeHtml(profile.storeName) +
+          "</p>" +
+          "</div>" +
+          '<button class="btn btn-primary" id="newListingBtn">Add listing</button>' +
+          "</div>";
+
+        if (listings.length === 0) {
+          html +=
+            '<div class="card" style="padding:40px 24px;text-align:center;">' +
+            '<div class="big-icon" style="margin:0 auto 12px;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16.5 9.4 7.55 4.24" /><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /></svg></div>' +
+            '<h3 style="font-size:1.05rem;font-weight:700;margin-bottom:4px;">No listings yet</h3>' +
+            '<p class="text-muted" style="margin-bottom:16px;">Add your first listing to start selling.</p>' +
+            '<button class="btn btn-primary" id="newListingBtnEmpty">Add your first listing</button>' +
+            "</div>";
+        } else {
+          html +=
+            '<div class="table-wrap"><table class="data"><thead><tr>' +
+            "<th>Listing</th>" +
+            "<th>Section</th>" +
+            "<th>Category</th>" +
+            "<th>Price</th>" +
+            "<th>Stock</th>" +
+            "<th>Status</th>" +
+            "<th></th>" +
+            "</tr></thead><tbody>";
+          for (var i = 0; i < listings.length; i++) {
+            var l = listings[i];
+            var img = l.images && l.images[0] ? l.images[0] : "https://placehold.co/80x80/eef2f6/1a202c?text=Item";
+            var stockClass = l.stockStatus === "in_stock" ? "stock-in" :
+              l.stockStatus === "low_stock" ? "stock-low" : "stock-out";
+            var statusClass = l.status === "active" ? "status-active" :
+              l.status === "archived" ? "status-archived" : "status-pending";
+            html +=
+              "<tr>" +
+              '<td>' +
+              '<div style="display:flex;align-items:center;gap:10px;">' +
+              '<div class="cart-item-img" style="width:48px;height:48px;"><img src="' +
+              window.Phyzel.escapeAttr(img) +
+              '" alt="" /></div>' +
+              '<div><strong>' +
+              window.Phyzel.escapeHtml(l.name) +
+              "</strong>" +
+              '<div class="text-small text-subtle">' +
+              window.Phyzel.escapeHtml(l.slug) +
+              "</div></div></div></td>" +
+              '<td><span class="pill ' + l.section + '">' +
+              (l.section === "fashion" ? "Fashion" : l.section === "food" ? "Food" : "Trading") +
+              "</span></td>" +
+              '<td>' +
+              window.Phyzel.escapeHtml(l.category || "—") +
+              "</td>" +
+              '<td>' +
+              window.Phyzel.formatMoney(l.price) +
+              "</td>" +
+              '<td><span class="' + stockClass + '">' +
+              (l.stockStatus === "in_stock" ? "In stock" :
+                l.stockStatus === "low_stock" ? "Low (" + l.stock + ")" : "Out of stock") +
+              "</span></td>" +
+              '<td><span class="status ' + statusClass + '">' + l.status + "</span></td>" +
+              '<td>' +
+              '<button class="btn btn-ghost btn-small edit-listing-btn" data-id="' +
+              l.id +
+              '">Edit</button> ' +
+              '<button class="btn btn-ghost btn-small archive-listing-btn" data-id="' +
+              l.id +
+              '" style="color:var(--color-text-subtle);">Archive</button>' +
+              "</td>" +
+              "</tr>";
+          }
+          html += "</tbody></table></div>";
+        }
+
+        html +=
+          '<div class="alert alert-info" style="margin-top:18px;font-size:0.82rem;">' +
+          '<svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>' +
+          '<span>Only you can manage your own listings. Editing another seller’s listing is blocked.</span>' +
+          "</div>";
+
+        root.innerHTML = html;
+
+        var newBtn = root.querySelector("#newListingBtn");
+        var newBtnEmpty = root.querySelector("#newListingBtnEmpty");
+        if (newBtn) newBtn.addEventListener("click", function () { window.Phyzel.openListingModal(root); });
+        if (newBtnEmpty) newBtnEmpty.addEventListener("click", function () { window.Phyzel.openListingModal(root); });
+
+        root.querySelectorAll(".edit-listing-btn").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var id = btn.getAttribute("data-id");
+            window.Phyzel.openListingModal(root, id);
+          });
+        });
+
+        root.querySelectorAll(".archive-listing-btn").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var id = btn.getAttribute("data-id");
+            window.Phyzel.confirm("Archive this listing? It will no longer be visible to customers.", "Archive listing", "danger")
+              .then(function (ok) {
+                if (!ok) return;
+                window.Phyzel.deleteListing(id).then(function () {
+                  window.Phyzel.toast("Listing archived.");
+                  window.Phyzel.renderSellerListingsPage(root);
+                }).catch(function (err) {
+                  window.Phyzel.toast(err.message || "Could not archive listing.", "error");
+                });
+              });
+          });
+        });
+      };
+
+      window.Phyzel.openListingModal = function (root, editId) {
+        var user = window.Phyzel.currentUser();
+        if (!user) return;
+
+        var profile = window.Phyzel.getSellerProfileByUserId(user.user.id);
+        if (!profile || !profile.isApproved || !profile.isActive) {
+          window.Phyzel.toast("Your seller account must be approved to add listings.", "warning");
+          return;
+        }
+
+        var existing = null;
+        if (editId) {
+          existing = window.Phyzel.listListings().find(function (l) {
+            return l.id === editId && l.sellerId === profile.id;
+          });
+          if (!existing) {
+            window.Phyzel.toast("Listing not found or you do not own it.", "error");
+            return;
+          }
+        }
+
+        var modal = document.createElement("div");
+        modal.className = "modal-backdrop";
+
+        var sections = [
+          { value: "fashion", label: "Fashion & Beauty" },
+          { value: "food", label: "Food" },
+          { value: "trading", label: "General Trading" },
+        ];
+        var categoryOptions = {
+          fashion: window.Phyzel.categoriesForSection("fashion").map(function (c) {
+            return '<option value="' + c + '">' + c + "</option>";
+          }).join(""),
+          food: window.Phyzel.categoriesForSection("food").map(function (c) {
+            return '<option value="' + c + '">' + c + "</option>";
+          }).join(""),
+          trading: window.Phyzel.categoriesForSection("trading").map(function (c) {
+            return '<option value="' + c + '">' + c + "</option>";
+          }).join(""),
+        };
+
+        modal.innerHTML =
+          '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="listingTitle">' +
+          '<div class="card-body">' +
+          '<h3 id="listingTitle">' +
+          (existing ? "Edit listing" : "Add listing") +
+          "</h3>" +
+          '<div class="subtitle">' +
+          (existing ? "Update the details for this listing." : "Fill in the details for your new listing.") +
+          "</div>";
+
+        modal.innerHTML +=
+          '<form id="listingForm" novalidate>' +
+          '<input type="hidden" id="listingId" value="' +
+          (existing ? existing.id : "") +
+          '" />' +
+          '<input type="hidden' +
+          (existing ? '" value="' + existing.section + '"' : "") +
+          ' id="listingSection" />' +
+          '<div class="field">' +
+          '<label for="listingName">Listing name <span class="req">*</span></label>' +
+          '<input type="text" id="listingName" value="' +
+          (existing ? window.Phyzel.escapeAttr(existing.name) : "") +
+          '" required />' +
+          '<div class="error" id="listingNameError"></div>' +
+          "</div>" +
+          '<div class="form-row">' +
+          '<div class="field">' +
+          '<label for="listingSectionSelect">Section <span class="req">*</span></label>' +
+          '<select id="listingSectionSelect" required>' +
+          '<option value="">Select a section…</option>' +
+          sections.map(function (s) {
+            return '<option value="' + s.value + '" ' +
+              (existing && existing.section === s.value ? "selected" : "") +
+              '>' + s.label + "</option>";
+          }).join("") +
+          "</select>" +
+          '<div class="error" id="listingSectionError"></div>' +
+          "</div>" +
+          '<div class="field" id="listingCategoryWrap">' +
+          '<select id="listingCategory" required>' +
+          '<option value="">Select a category…</option>' +
+          (existing ? categoryOptions[existing.section] || "" : "") +
+          "</select>" +
+          '<div class="error" id="listingCategoryError"></div>' +
+          "</div>" +
+          "</div>" +
+          '<div class="field">' +
+          '<label for="listingDescription">Description</label>' +
+          '<textarea id="listingDescription">' +
+          (existing ? window.Phyzel.escapeHtml(existing.description) : "") +
+          "</textarea>" +
+          "</div>" +
+          '<div class="form-row">' +
+          '<div class="field">' +
+          '<label for="listingPrice">Price (GHS) <span class="req">*</span></label>' +
+          '<input type="number" id="listingPrice" min="0" step="1" value="' +
+          (existing ? existing.price : "") +
+          '" required />' +
+          '<div class="error" id="listingPriceError"></div>' +
+          "</div>" +
+          '<div class="field">' +
+          '<label for="listingStock">Stock <span class="req">*</span></label>' +
+          '<input type="number" id="listingStock" min="0" step="1" value="' +
+          (existing ? existing.stock : "") +
+          '" required />' +
+          '<div class="error" id="listingStockError"></div>' +
+          '<div class="hint">Use a large number for unlimited stock.</div>' +
+          "</div>" +
+          "</div>" +
+          '<div class="field">' +
+          '<label for="listingImage">Image URL <span class="text-subtle">(optional)</span></label>' +
+          '<input type="url" id="listingImage" value="' +
+          (existing && existing.images && existing.images[0] ? window.Phyzel.escapeAttr(existing.images[0]) : "") +
+          '" placeholder="https://…/image.jpg" />' +
+          '<div class="hint">A placeholder is used if left blank.</div>' +
+          "</div>" +
+          '<div class="form-actions">' +
+          '<button type="button" class="btn btn-secondary" id="listingCancelBtn">Cancel</button>' +
+          '<button type="submit" class="btn btn-primary" id="listingSaveBtn">' +
+          (existing ? "Save changes" : "Create listing") +
+          "</button>" +
+          "</div>" +
+          "</form>" +
+          "</div></div>";
+
+        document.body.appendChild(modal);
+
+        var sectionSelect = modal.querySelector("#listingSectionSelect");
+        var categoryWrap = modal.querySelector("#listingCategoryWrap");
+        var categorySelect = modal.querySelector("#listingCategory");
+
+        if (sectionSelect) {
+          sectionSelect.addEventListener("change", function () {
+            var val = sectionSelect.value;
+            categorySelect.innerHTML = categoryOptions[val] || '<option value="">Select a category…</option>';
+          });
+        }
+
+        modal.querySelector("#listingCancelBtn").addEventListener("click", function () {
+          modal.remove();
+        });
+        modal.addEventListener("click", function (e) {
+          if (e.target === modal) modal.remove();
+        });
+
+        modal.querySelector("#listingForm").addEventListener("submit", function (e) {
+          e.preventDefault();
+          var name = modal.querySelector("#listingName").value.trim();
+          var section = modal.querySelector("#listingSectionSelect").value;
+          var category = modal.querySelector("#listingCategory").value;
+          var description = modal.querySelector("#listingDescription").value.trim();
+          var price = parseInt(modal.querySelector("#listingPrice").value, 10);
+          var stock = parseInt(modal.querySelector("#listingStock").value, 10);
+          var image = modal.querySelector("#listingImage").value.trim();
+
+          var ok = true;
+          var nameErr = modal.querySelector("#listingNameError");
+          var sectionErr = modal.querySelector("#listingSectionError");
+          var catErr = modal.querySelector("#listingCategoryError");
+          var priceErr = modal.querySelector("#listingPriceError");
+          var stockErr = modal.querySelector("#listingStockError");
+          [nameErr, sectionErr, catErr, priceErr, stockErr].forEach(function (el) { if (el) el.textContent = ""; });
+
+          if (!name) { if (nameErr) nameErr.textContent = "Listing name is required."; ok = false; }
+          if (!section) { if (sectionErr) sectionErr.textContent = "Section is required."; ok = false; }
+          if (!category) { if (catErr) catErr.textContent = "Category is required."; ok = false; }
+          if (isNaN(price) || price < 0) { if (priceErr) priceErr.textContent = "Enter a valid price."; ok = false; }
+          if (isNaN(stock) || stock < 0) { if (stockErr) stockErr.textContent = "Enter a valid stock."; ok = false; }
+          if (!ok) return;
+
+          var images = image ? [image] : [];
+          var tags = [];
+
+          var btn = modal.querySelector("#listingSaveBtn");
+          btn.disabled = true;
+          btn.textContent = "Saving…";
+
+          var payload = {
+            id: existing ? existing.id : window.Phyzel.genId(),
+            sellerId: profile.id,
+            section: section,
+            category: category,
+            name: name,
+            slug: existing ? existing.slug : window.Phyzel.slugify(name) + "-" + Date.now(),
+            description: description,
+            price: price,
+            currency: "GHS",
+            stock: stock,
+            stockStatus: stock <= 0 ? "out_of_stock" : stock < 5 ? "low_stock" : "in_stock",
+            images: JSON.stringify(images),
+            tags: JSON.stringify(tags),
+            isFeatured: existing ? existing.isFeatured : false,
+            isHidden: false,
+            status: "active",
+            createdAt: existing ? existing.createdAt : window.Phyzel.nowIso(),
+            updatedAt: window.Phyzel.nowIso(),
+            publishedAt: existing ? existing.publishedAt : window.Phyzel.nowIso(),
+          };
+
+          if (existing) {
+            window.Phyzel.saveListing(payload).then(function () {
+              window.Phyzel.logAudit("listing_updated", "listing", payload.id, "Listing updated: " + payload.name, null, user.user);
+              window.Phyzel.toast("Listing updated.");
+              modal.remove();
+              window.Phyzel.renderSellerListingsPage(root);
+            }).catch(function (err) {
+              window.Phyzel.toast(err.message || "Could not save listing.", "error");
+              btn.disabled = false;
+              btn.textContent = existing ? "Save changes" : "Create listing";
+            });
+          } else {
+            window.Phyzel.saveListing(payload).then(function () {
+              window.Phyzel.logAudit("listing_created", "listing", payload.id, "Listing created: " + payload.name, null, user.user);
+              window.Phyzel.toast("Listing created.");
+              modal.remove();
+              window.Phyzel.renderSellerListingsPage(root);
+            }).catch(function (err) {
+              window.Phyzel.toast(err.message || "Could not create listing.", "error");
+              btn.disabled = false;
+              btn.textContent = "Create listing";
+            });
+          }
+        });
+      };
+
+      if (document.readyState === "complete" || document.readyState === "interactive") {
+        window.Phyzel.renderSellerListingsPage(root);
+      } else {
+        document.addEventListener("DOMContentLoaded", function () {
+          window.Phyzel.renderSellerListingsPage(root);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
