@@ -1,1 +1,47 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Create account · Phyzel</title><link rel="stylesheet" href="styles.css"></head><body><main class="container"><div class="form-shell"><a class="brand" href="index.html">phyzel<span>.</span></a><h1>Create your account</h1><form data-auth-form="register"><label>Name<input class="input" name="name" required></label><label>Email<input class="input" name="email" type="email" required></label><label>Password<input class="input" name="password" type="password" minlength="8" required></label><button class="btn btn-primary">Create account</button></form><p class="small muted">Already registered? <a href="login.html">Sign in</a></p></div></main><script src="app.js"></script><script src="authentication.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Create an account · Phyzel</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="responsive.css">
+  <style>
+    .account-role-shell{min-height:100vh;display:grid;place-items:center;padding:24px}
+    .account-role-modal{width:min(960px,100%);padding:34px;border-radius:20px;background:#fff;border:1px solid var(--line);box-shadow:0 24px 80px rgba(0,0,0,.14)}
+    .account-role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:26px}
+    .account-role-card{display:flex;flex-direction:column;gap:10px;min-height:230px;padding:22px;border:1px solid var(--line);border-radius:14px;background:#fbfdfb}
+    .account-role-card:hover,.account-role-card:focus{border-color:var(--green);outline:3px solid rgba(18,107,80,.16)}
+    .account-role-card strong{font-size:1.15rem}.account-role-card span{color:var(--muted);font-size:.92rem}.account-role-card b{color:var(--green);margin-top:auto}
+    @media(max-width:760px){.account-role-grid{grid-template-columns:1fr}.account-role-modal{padding:24px}}
+  </style>
+</head>
+<body>
+  <main class="account-role-shell">
+    <section class="account-role-modal" aria-labelledby="accountRoleTitle">
+      <a class="brand" href="index.html">phyzel<span>.</span></a>
+      <div class="eyebrow" style="margin-top:28px">Create an account</div>
+      <h1 id="accountRoleTitle">How will you use Phyzel Marketplace?</h1>
+      <p class="muted">Choose the experience that matches what you want to do. You can browse publicly at any time.</p>
+      <div class="account-role-grid">
+        <a class="account-role-card" href="buyer-register.html">
+          <strong>Be a Buyer</strong>
+          <span>Browse Fashion, Food, and Trading listings, use your cart, check out, and keep your order history in one account.</span>
+          <b>Create buyer account →</b>
+        </a>
+        <a class="account-role-card" href="seller-register.html">
+          <strong>Be a Seller</strong>
+          <span>Submit your business for review, save your application, and manage listings and customer orders after approval.</span>
+          <b>Start seller application →</b>
+        </a>
+        <a class="account-role-card" href="index.html">
+          <strong>Continue as a Guest</strong>
+          <span>Browse marketplaces and listing details without an account. Create an account later for saved orders and member features.</span>
+          <b>Browse as guest →</b>
+        </a>
+      </div>
+      <p class="small muted" style="margin-top:22px">Already have an account? <a href="login.html">Sign in</a>.</p>
+    </section>
+  </main>
+</body>
+</html>
