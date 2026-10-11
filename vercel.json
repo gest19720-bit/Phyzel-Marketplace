@@ -1,0 +1,9 @@
+{
+  "framework": null,
+  "outputDirectory": ".",
+  "functions": {
+    "api/[...path].js": {
+      "runtime": "nodejs22.x"
+    }
+  }
+}
