@@ -7,7 +7,7 @@ const auth = require('./auth');
 const whop = require('./whop');
 const supabase = require('./supabase');
 const webhooks = require('./webhooks');
-const { json, requireUser, requireRole } = require('./middleware');
+const { json, requireUser, requireRole } = require('./http-middleware');
 
 const staticFiles = new Set(['html', 'css', 'js', 'svg', 'png', 'jpg', 'jpeg', 'webp', 'ico']);
 const contentTypes = { html: 'text/html; charset=utf-8', css: 'text/css; charset=utf-8', js: 'text/javascript; charset=utf-8', svg: 'image/svg+xml', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp', ico: 'image/x-icon' };
@@ -56,6 +56,21 @@ async function handler(req, res) {
     if (req.method === 'GET' && url.pathname.startsWith('/api/listings/')) { const listing = db.getListing(url.pathname.split('/').pop()); return listing ? json(res, 200, { listing }) : json(res, 404, { error: 'Listing not found' }); }
     if (req.method === 'GET' && url.pathname === '/api/orders') { if (!requireUser(req, res)) return; return json(res, 200, { orders: db.getOrders(req.user.id) }); }
     if (req.method === 'POST' && url.pathname === '/api/checkout') { if (!requireUser(req, res)) return; const body = await readBody(req); const listing = db.getListing(clean(body.listingId, 100)); if (!listing) return json(res, 404, { error: 'Listing not found' }); const order = db.createOrder(req.user.id, listing, Math.max(1, Math.min(Number(body.quantity) || 1, 20))); try { return json(res, 201, { order, checkout: await whop.createCheckout({ order, listing }) }); } catch (error) { return json(res, 503, { error: error.message, order }); } }
+    if (req.method === 'GET' && url.pathname === '/api/admin/overview') {
+      if (!requireRole(req, res, ['admin'])) return;
+      const counts = {
+        businesses: db.db.prepare('SELECT COUNT(*) AS count FROM businesses').get().count,
+        approvedSellers: db.db.prepare("SELECT COUNT(*) AS count FROM users WHERE role='seller'").get().count,
+        pendingApplications: db.db.prepare("SELECT COUNT(*) AS count FROM seller_applications WHERE status IN ('Pending','Under Review')").get().count,
+        publishedListings: db.db.prepare("SELECT COUNT(*) AS count FROM listings WHERE status='published'").get().count,
+        totalOrders: db.db.prepare('SELECT COUNT(*) AS count FROM orders').get().count,
+        paidOrders: db.db.prepare("SELECT COUNT(*) AS count FROM orders WHERE payment_status='paid'").get().count,
+        verifiedRevenue: db.db.prepare("SELECT COALESCE(SUM(total),0) AS total FROM orders WHERE payment_status='paid'").get().total,
+        recordedCommission: db.db.prepare("SELECT COALESCE(SUM(commission),0) AS total FROM orders WHERE payment_status='paid'").get().total
+      };
+      const recentOrders = db.db.prepare('SELECT reference,total,currency,payment_status,created_at FROM orders ORDER BY created_at DESC LIMIT 8').all();
+      return json(res, 200, { counts, recentOrders });
+    }
     if (req.method === 'GET' && url.pathname === '/api/admin/applications') { if (!requireRole(req, res, ['admin'])) return; return json(res, 200, { applications: db.getApplications() }); }
     if (req.method === 'POST' && url.pathname.startsWith('/api/admin/applications/')) { if (!requireRole(req, res, ['admin'])) return; const applicationId = url.pathname.split('/').pop(); const body = await readBody(req); const statuses = { approve: 'Approved', approved: 'Approved', reject: 'Rejected', rejected: 'Rejected', changes_requested: 'Changes Requested', suspend: 'Suspended', suspended: 'Suspended', under_review: 'Under Review' }; const status = statuses[String(body.status || '').toLowerCase()]; if (!status) return json(res, 400, { error: 'Invalid application status.' }); return json(res, 200, { application: db.reviewApplication(applicationId, status, req.user.id, clean(body.notes, 1000)) }); }
     if (req.method === 'POST' && url.pathname === '/api/webhooks/whop') { const raw = await readRawBody(req); return json(res, 200, webhooks.processWhopWebhook(raw, req.headers['whop-signature'] || '')); }
@@ -63,4 +78,5 @@ async function handler(req, res) {
     return json(res, 404, { error: 'Not found' });
   } catch (error) { console.error(error); return json(res, 500, { error: 'Unexpected server error.' }); }
 }
-http.createServer(handler).listen(config.port, () => console.log(`Phyzel Marketplace running at http://localhost:${config.port}`));
+if (require.main === module) http.createServer(handler).listen(config.port, () => console.log(`Phyzel Marketplace running at http://localhost:${config.port}`));
+module.exports = handler;

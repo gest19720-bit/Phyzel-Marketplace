@@ -4,6 +4,6 @@
   "private": true,
   "description": "Ghana-first fashion, food, and trading marketplace MVP",
   "main": "server.js",
-  "scripts": {"start": "node server.js", "check": "node --check server.js && node --check database.js && node --check auth.js && node --check app.js && node --check marketplace.js && node --check onboarding.js && node --check authentication.js && node --check seller.js && node --check admin.js && node --check checkout.js"},
+  "scripts": {"start": "node server.js", "check": "node --check server.js && node --check database.js && node --check auth.js && node --check http-middleware.js && node --check api/[...path].js && node --check app.js && node --check marketplace.js && node --check onboarding.js && node --check authentication.js && node --check seller.js && node --check admin.js && node --check checkout.js"},
   "engines": {"node": ">=22"}
 }
