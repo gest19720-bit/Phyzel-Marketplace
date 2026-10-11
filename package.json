@@ -1,0 +1,9 @@
+{
+  "name": "phyzel-marketplace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ghana-first fashion, food, and trading marketplace MVP",
+  "main": "server.js",
+  "scripts": {"start": "node server.js", "check": "node --check server.js && node --check database.js && node --check app.js && node --check marketplace.js && node --check authentication.js && node --check seller.js && node --check admin.js && node --check checkout.js"},
+  "engines": {"node": ">=22"}
+}

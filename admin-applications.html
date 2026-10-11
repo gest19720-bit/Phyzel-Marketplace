@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Applications — Admin — Phyzel Marketplace</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a href="index.html" class="brand" aria-label="Phyzel Marketplace home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z" /><path d="M10 9h4" /><path d="M10 13h4" /></svg>
+        Phyzel Marketplace
+        <small>Ghana-first</small>
+      </a>
+      <nav class="nav" id="mainNav">
+        <a href="index.html">Home</a>
+        <a href="fashion-beauty.html">Fashion &amp; Beauty</a>
+        <a href="food.html">Food</a>
+        <a href="general-trading.html">General Trading</a>
+        <a href="seller-application.html">Become a Seller</a>
+      </nav>
+      <div class="nav-actions">
+        <a href="cart.html" class="cart-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></svg>
+          Cart
+          <span class="count hidden" data-cart-count>0</span>
+        </a>
+        <template id="userMenuTpl">
+          <div class="user-menu">
+            <div class="avatar"><span data-user-initial>U</span></div>
+            <div>
+              <div class="name" data-user-name>User</div>
+              <div class="role" data-user-role>Customer</div>
+            </div>
+            <svg class="caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9" /></svg>
+            <div class="dropdown">
+              <a href="customer-dashboard.html" data-user-link>My account</a>
+              <a href="admin-dashboard.html">Admin dashboard</a>
+              <hr class="sep" />
+              <a href="login.html" data-action-logout>Sign out</a>
+            </div>
+          </div>
+        </template>
+        <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="wrap">
+      <div id="adminApplicationsRoot"></div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-brand">
+        <div class="brand">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z" /><path d="M10 9h4" /><path d="M10 13h4" /></svg>
+          Phyzel Marketplace
+        </div>
+        <p>A Ghana-first marketplace for fashion, food, and general trading.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Marketplace</h4>
+        <ul>
+          <li><a href="fashion-beauty.html">Fashion &amp; Beauty</a></li>
+          <li><a href="food.html">Food</a></li>
+          <li><a href="general-trading.html">General Trading</a></li>
+          <li><a href="seller-application.html">Become a seller</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Account</h4>
+        <ul>
+          <li><a href="login.html">Sign in</a></li>
+          <li><a href="register.html">Create account</a></li>
+          <li><a href="customer-dashboard.html">My account</a></li>
+          <li><a href="cart.html">Cart</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="#">Contact us</a></li>
+          <li><a href="#">Help center</a></li>
+          <li><a href="#">Delivery info</a></li>
+          <li><a href="#">Returns</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="footer-bottom">
+        <div>&copy; Phyzel Marketplace. All rights reserved.</div>
+        <div class="sample">Sample data for development only</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js" defer></script>
+  <script src="auth.js" defer></script>
+  <script src="admin.js" defer></script>
+  <script>
+    (function () {
+      "use strict";
+      var root = document.getElementById("adminApplicationsRoot");
+      if (!root) return;
+
+      window.Phyzel.renderAdminApplicationsPage = function (root) {
+        var user = window.Phyzel.currentUser();
+        if (!user || user.user.role !== "admin") {
+          root.innerHTML =
+            '<div class="card" style="max-width:560px;margin:40px auto;padding:30px;text-align:center;">' +
+            '<h2 style="font-size:1.2rem;font-weight:700;margin-bottom:6px;">Admin access required</h2>' +
+            '<p class="text-muted" style="margin-bottom:18px;">Only administrators can review applications.</p>' +
+            '<a href="index.html" class="btn btn-primary">Back to homepage</a>' +
+            "</div>";
+          return;
+        }
+
+        var applications = window.Phyzel.listSellerApplications();
+        var pending = applications.filter(function (a) { return a.status === "pending" || a.status === "under_review"; });
+
+        var html =
+          '<nav aria-label="Breadcrumb" style="margin-bottom:18px;">' +
+          '<ol style="display:flex;flex-wrap:wrap;gap:6px 10px;font-size:0.85rem;color:var(--color-text-subtle);list-style:none;">' +
+          '<li><a href="index.html" style="color:var(--color-accent);">Home</a></li>' +
+          '<li><span aria-hidden="true">/</span></li>' +
+          '<li><a href="admin-dashboard.html" style="color:var(--color-accent);">Admin</a></li>' +
+          '<li><span aria-hidden="true">/</span></li>' +
+          '<li>Applications</li>' +
+          "</ol></nav>";
+
+        html +=
+          '<div class="flex flex-between flex-wrap gap-3 mb-2">' +
+          '<div>' +
+          '<h1 class="page-title" style="font-size:1.4rem;">Seller applications</h1>' +
+          '<p class="text-muted">Review and decide on seller applications.</p>' +
+          "</div>" +
+          '<span class="status status-pending-app">' + pending.length + " pending</span>" +
+          "</div>";
+
+        if (applications.length === 0) {
+          html +=
+            '<div class="card" style="padding:40px 24px;text-align:center;">' +
+            '<div class="big-icon" style="margin:0 auto 12px;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg></div>' +
+            '<h3 style="font-size:1.05rem;font-weight:700;margin-bottom:4px;">No applications</h3>' +
+            '<p class="text-muted" style="margin-bottom:16px;">Seller applications will appear here for review.</p>' +
+            "</div>";
+        } else {
+          html +=
+            '<div class="table-wrap"><table class="data"><thead><tr>' +
+            "<th>Applicant</th>" +
+            "<th>Store</th>" +
+            "<th>Section</th>" +
+            "<th>Status</th>" +
+            "<th>Submitted</th>" +
+            "<th></th>" +
+            "</tr></thead><tbody>";
+          for (var i = 0; i < applications.length; i++) {
+            var a = applications[i];
+            var statusClass = a.status === "pending" ? "status-pending-app" :
+              a.status === "under_review" ? "status-underr-review" :
+              a.status === "approved" ? "status-approved" :
+              a.status === "rejected" ? "status-rejected" : "status-suspended";
+            html +=
+              "<tr>" +
+              '<td>' +
+              window.Phyzel.escapeHtml(a.applicantName) +
+              '<div class="text-small text-subtle">' +
+              window.Phyzel.escapeHtml(a.email) +
+              "</div></td>" +
+              '<td><strong>' +
+              window.Phyzel.escapeHtml(a.storeName) +
+              "</strong></td>" +
+              '<td><span class="pill ' + a.targetSection + '">' +
+              (a.targetSection === "fashion" ? "Fashion" : a.targetSection === "food" ? "Food" : "Trading") +
+              "</span></td>" +
+              '<td><span class="status ' + statusClass + '">' + a.status + "</span></td>" +
+              '<td class="text-small text-subtle">' + (a.createdAt ? a.createdAt.slice(0, 10) : "—") + "</td>" +
+              '<td><button class="btn btn-ghost btn-small review-app-btn" data-id="' + a.id + '">Review</button></td>' +
+              "</tr>";
+          }
+          html += "</tbody></table></div>";
+        }
+
+        html +=
+          '<div class="alert alert-info" style="margin-top:18px;font-size:0.82rem;">' +
+          '<svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>' +
+          '<span>Decisions are recorded against the application. Approved applicants become sellers.</span>' +
+          "</div>";
+
+        root.innerHTML = html;
+
+        root.querySelectorAll(".review-app-btn").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var id = btn.getAttribute("data-id");
+            var app = window.Phyzel.listSellerApplications().find(function (x) { return x.id === id; });
+            if (!app) return;
+            var overlay = document.createElement("div");
+            overlay.className = "modal-backdrop";
+            overlay.innerHTML =
+              '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="reviewTitle">' +
+              '<div class="card-body">' +
+              '<h3 id="reviewTitle">Review application</h3>' +
+              '<div class="subtitle"><strong>' +
+              window.Phyzel.escapeHtml(app.storeName) +
+              "</strong> · " +
+              window.Phyzel.escapeHtml(app.email) +
+              "</div>" +
+              '<div style="background:var(--color-bg-muted);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:16px;font-size:0.88rem;">' +
+              '<div><strong>Applicant:</strong> ' + window.Phyzel.escapeHtml(app.applicantName) + "</div>" +
+              '<div style="margin-top:4px;"><strong>Phone:</strong> ' + window.Phyzel.escapeHtml(app.phone || "—") + "</div>" +
+              '<div style="margin-top:4px;"><strong>Section:</strong> ' +
+              (app.targetSection === "fashion" ? "Fashion & Beauty" : app.targetSection === "food" ? "Food" : "General Trading") +
+              "</div>" +
+              '<div style="margin-top:4px;"><strong>Location:</strong> ' + window.Phyzel.escapeHtml(app.location || "—") + "</div>" +
+              (app.businessDetails ? '<div style="margin-top:6px;"><strong>Details:</strong> ' + window.Phyzel.escapeHtml(app.businessDetails) + "</div>" : "") +
+              (app.verificationInfo ? '<div style="margin-top:6px;"><strong>Verification:</strong> ' + window.Phyzel.escapeHtml(app.verificationInfo) + "</div>" : "") +
+              "</div>" +
+              '<form id="reviewForm" novalidate style="display:grid;gap:14px;">' +
+              '<div class="field">' +
+              '<label for="reviewDecision">Decision</label>' +
+              '<select id="reviewDecision" required>' +
+              '<option value="">Select a decision…</option>' +
+              '<option value="approve">Approve</option>' +
+              '<option value="reject">Reject</option>' +
+              '<option value="suspend">Suspend</option>' +
+              "</select>" +
+              '<div class="error" id="reviewDecisionError"></div>' +
+              "</div>" +
+              '<div class="field">' +
+              '<label for="reviewNotes">Admin notes <span class="text-subtle">(optional)</span></label>' +
+              '<textarea id="reviewNotes" placeholder="Internal notes for this review.">' +
+              (app.adminNotes ? window.Phyzel.escapeHtml(app.adminNotes) : "") +
+              "</textarea>" +
+              "</div>" +
+              '<div class="form-actions">' +
+              '<button type="button" class="btn btn-secondary" id="reviewCancelBtn">Close</button>' +
+              '<button type="submit" class="btn btn-primary" id="reviewSubmitBtn">Submit decision</button>' +
+              "</div>" +
+              "</form>" +
+              "</div></div>";
+            document.body.appendChild(overlay);
+            overlay.querySelector("#reviewCancelBtn").addEventListener("click", function () { overlay.remove(); });
+            overlay.addEventListener("click", function (e) { if (e.target === overlay) overlay.remove(); });
+            overlay.querySelector("#reviewForm").addEventListener("submit", function (e) {
+              e.preventDefault();
+              var decision = overlay.querySelector("#reviewDecision").value;
+              var notes = overlay.querySelector("#reviewNotes").value.trim();
+              if (!decision) {
+                overlay.querySelector("#reviewDecisionError").textContent = "Select a decision.";
+                return;
+              }
+              var btn = overlay.querySelector("#reviewSubmitBtn");
+              btn.disabled = true;
+              btn.textContent = "Submitting…";
+              var updated = Object.assign({}, app, {
+                status: decision === "approve" ? "approved" : decision === "reject" ? "rejected" : decision === "suspend" ? "suspended" : app.status,
+                decision: decision === "approve" ? "approved" : decision === "reject" ? "rejected" : decision === "suspend" ? "suspended" : null,
+                adminNotes: notes || app.adminNotes,
+                reviewedBy: user.user.id,
+                reviewedAt: window.Phyzel.nowIso(),
+                updatedAt: window.Phyzel.nowIso(),
+              });
+              window.Phyzel.saveSellerApplication(updated).then(function () {
+                window.Phyzel.logAudit("application_" + decision, "seller_application", id, "Application " + app.storeName + " → " + decision, null, user.user);
+                if (decision === "approve") {
+                  var existingProfile = window.Phyzel.listSellerProfiles().find(function (p) {
+                    return p.email === app.email;
+                  });
+                  if (!existingProfile) {
+                    window.Phyzel.saveSellerProfile({
+                      id: window.Phyzel.genId(),
+                      userId: null,
+                      storeName: app.storeName,
+                      description: app.description,
+                      location: app.location,
+                      logoRef: null,
+                      isApproved: true,
+                      isActive: true,
+                      notes: notes,
+                      approvedBy: user.user.id,
+                      approvedAt: window.Phyzel.nowIso(),
+                      createdAt: window.Phyzel.nowIso(),
+                      updatedAt: window.Phyzel.nowIso(),
+                      sample: false,
+                      section: app.targetSection,
+                    });
+                  }
+                }
+                window.Phyzel.toast("Application " + decision + ".");
+                overlay.remove();
+                window.Phyzel.renderAdminApplicationsPage(root);
+              }).catch(function (err) {
+                window.Phyzel.toast(err.message || "Could not submit decision.", "error");
+                btn.disabled = false;
+                btn.textContent = "Submit decision";
+              });
+            });
+          });
+        });
+      };
+
+      if (document.readyState === "complete" || document.readyState === "interactive") {
+        window.Phyzel.renderAdminApplicationsPage(root);
+      } else {
+        document.addEventListener("DOMContentLoaded", function () {
+          window.Phyzel.renderAdminApplicationsPage(root);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

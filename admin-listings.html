@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Listings — Admin — Phyzel Marketplace</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a href="index.html" class="brand" aria-label="Phyzel Marketplace home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z" /><path d="M10 9h4" /><path d="M10 13h4" /></svg>
+        Phyzel Marketplace
+        <small>Ghana-first</small>
+      </a>
+      <nav class="nav" id="mainNav">
+        <a href="index.html">Home</a>
+        <a href="fashion-beauty.html">Fashion &amp; Beauty</a>
+        <a href="food.html">Food</a>
+        <a href="general-trading.html">General Trading</a>
+        <a href="seller-application.html">Become a Seller</a>
+      </nav>
+      <div class="nav-actions">
+        <a href="cart.html" class="cart-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></svg>
+          Cart
+          <span class="count hidden" data-cart-count>0</span>
+        </a>
+        <template id="userMenuTpl">
+          <div class="user-menu">
+            <div class="avatar"><span data-user-initial>U</span></div>
+            <div>
+              <div class="name" data-user-name>User</div>
+              <div class="role" data-user-role>Customer</div>
+            </div>
+            <svg class="caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9" /></svg>
+            <div class="dropdown">
+              <a href="customer-dashboard.html" data-user-link>My account</a>
+              <a href="admin-dashboard.html">Admin dashboard</a>
+              <hr class="sep" />
+              <a href="login.html" data-action-logout>Sign out</a>
+            </div>
+          </div>
+        </template>
+        <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="wrap">
+      <div id="adminListingsRoot"></div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-brand">
+        <div class="brand">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z" /><path d="M10 9h4" /><path d="M10 13h4" /></svg>
+          Phyzel Marketplace
+        </div>
+        <p>A Ghana-first marketplace for fashion, food, and general trading.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Marketplace</h4>
+        <ul>
+          <li><a href="fashion-beauty.html">Fashion &amp; Beauty</a></li>
+          <li><a href="food.html">Food</a></li>
+          <li><a href="general-trading.html">General Trading</a></li>
+          <li><a href="seller-application.html">Become a seller</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Account</h4>
+        <ul>
+          <li><a href="login.html">Sign in</a></li>
+          <li><a href="register.html">Create account</a></li>
+          <li><a href="customer-dashboard.html">My account</a></li>
+          <li><a href="cart.html">Cart</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="#">Contact us</a></li>
+          <li><a href="#">Help center</a></li>
+          <li><a href="#">Delivery info</a></li>
+          <li><a href="#">Returns</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="footer-bottom">
+        <div>&copy; Phyzel Marketplace. All rights reserved.</div>
+        <div class="sample">Sample data for development only</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js" defer></script>
+  <script src="auth.js" defer></script>
+  <script src="admin.js" defer></script>
+  <script>
+    (function () {
+      "use strict";
+      var root = document.getElementById("adminListingsRoot");
+      if (!root) return;
+
+      window.Phyzel.renderAdminListingsPage = function (root) {
+        var user = window.Phyzel.currentUser();
+        if (!user || user.user.role !== "admin") {
+          root.innerHTML =
+            '<div class="card" style="max-width:560px;margin:40px auto;padding:30px;text-align:center;">' +
+            '<h2 style="font-size:1.2rem;font-weight:700;margin-bottom:6px;">Admin access required</h2>' +
+            '<p class="text-muted" style="margin-bottom:18px;">Only administrators can moderate listings.</p>' +
+            '<a href="index.html" class="btn btn-primary">Back to homepage</a>' +
+            "</div>";
+          return;
+        }
+
+        var listings = window.Phyzel.listListings();
+
+        var html =
+          '<nav aria-label="Breadcrumb" style="margin-bottom:18px;">' +
+          '<ol style="display:flex;flex-wrap:wrap;gap:6px 10px;font-size:0.85rem;color:var(--color-text-subtle);list-style:none;">' +
+          '<li><a href="index.html" style="color:var(--color-accent);">Home</a></li>' +
+          '<li><span aria-hidden="true">/</span></li>' +
+          '<li><a href="admin-dashboard.html" style="color:var(--color-accent);">Admin</a></li>' +
+          '<li><span aria-hidden="true">/</span></li>' +
+          '<li>Listings</li>' +
+          "</ol></nav>";
+
+        html +=
+          '<div class="flex flex-between flex-wrap gap-3 mb-2">' +
+          '<div>' +
+          '<h1 class="page-title" style="font-size:1.4rem;">Listings</h1>' +
+          '<p class="text-muted">Moderate marketplace listings.</p>' +
+          "</div>" +
+          '<button class="btn btn-primary" id="newListingBtn">Create listing</button>' +
+          "</div>";
+
+        if (listings.length === 0) {
+          html +=
+            '<div class="card" style="padding:40px 24px;text-align:center;">' +
+            '<div class="big-icon" style="margin:0 auto 12px;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16.5 9.4 7.55 4.24" /><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /></svg></div>' +
+            '<h3 style="font-size:1.05rem;font-weight:700;margin-bottom:4px;">No listings</h3>' +
+            '<p class="text-muted" style="margin-bottom:16px;">Listings will appear here as sellers publish them.</p>' +
+            '<button class="btn btn-primary" id="newListingBtnEmpty">Create a listing</button>' +
+            "</div>";
+        } else {
+          html +=
+            '<div class="table-wrap"><table class="data"><thead><tr>' +
+            "<th>Listing</th>" +
+            "<th>Section</th>" +
+            "<th>Seller</th>" +
+            "<th>Price</th>" +
+            "<th>Stock</th>" +
+            "<th>Status</th>" +
+            "<th></th>" +
+            "</tr></thead><tbody>";
+          for (var i = 0; i < listings.length; i++) {
+            var l = listings[i];
+            var img = l.images && l.images[0] ? l.images[0] : "https://placehold.co/80x80/eef2f6/1a202c?text=Item";
+            var stockClass = l.stockStatus === "in_stock" ? "stock-in" :
+              l.stockStatus === "low_stock" ? "stock-low" : "stock-out";
+            var statusClass = l.status === "active" ? "status-active" :
+              l.status === "archived" ? "status-archived" : "status-pending";
+            var profile = l.sellerId ? window.Phyzel.getSellerProfileById(l.sellerId) : null;
+            var sellerName = profile ? profile.storeName : "Unknown seller";
+            html +=
+              "<tr>" +
+              '<td>' +
+              '<div style="display:flex;align-items:center;gap:10px;">' +
+              '<div class="cart-item-img" style="width:48px;height:48px;"><img src="' +
+              window.Phyzel.escapeAttr(img) +
+              '" alt="" /></div>' +
+              '<div><strong>' +
+              window.Phyzel.escapeHtml(l.name) +
+              "</strong>" +
+              '<div class="text-small text-subtle">' +
+              window.Phyzel.escapeHtml(l.slug) +
+              "</div></div></div></td>" +
+              '<td><span class="pill ' + l.section + '">' +
+              (l.section === "fashion" ? "Fashion" : l.section === "food" ? "Food" : "Trading") +
+              "</span></td>" +
+              '<td>' +
+              window.Phyzel.escapeHtml(sellerName) +
+              "</td>" +
+              '<td>' +
+              window.Phyzel.formatMoney(l.price) +
+              "</td>" +
+              '<td><span class="' + stockClass + '">' +
+              (l.stockStatus === "in_stock" ? "In stock" :
+                l.stockStatus === "low_stock" ? "Low (" + l.stock + ")" : "Out of stock") +
+              "</span></td>" +
+              '<td><span class="status ' + statusClass + '">' + l.status + "</span></td>" +
+              '<td>' +
+              '<button class="btn btn-ghost btn-small archive-listing-btn" data-id="' + l.id + '">Archive</button>' +
+              "</td>" +
+              "</tr>";
+          }
+          html += "</tbody></table></div>";
+        }
+
+        html +=
+          '<div class="alert alert-info" style="margin-top:18px;font-size:0.82rem;">' +
+          '<svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>' +
+          '<span>Archiving a listing hides it and sets it to archived.</span>' +
+          "</div>";
+
+        root.innerHTML = html;
+
+        var newBtn = root.querySelector("#newListingBtn");
+        var newBtnEmpty = root.querySelector("#newListingBtnEmpty");
+        function openNewListingForm() {
+          var overlay = document.createElement("div");
+          overlay.className = "modal-backdrop";
+          var sections = [
+            { value: "fashion", label: "Fashion & Beauty" },
+            { value: "food", label: "Food" },
+            { value: "trading", label: "General Trading" },
+          ];
+          var categoryOptions = {
+            fashion: window.Phyzel.categoriesForSection("fashion").map(function (c) {
+              return '<option value="' + c + '">' + c + "</option>";
+            }).join(""),
+            food: window.Phyzel.categoriesForSection("food").map(function (c) {
+              return '<option value="' + c + '">' + c + "</option>";
+            }).join(""),
+            trading: window.Phyzel.categoriesForSection("trading").map(function (c) {
+              return '<option value="' + c + '">' + c + "</option>";
+            }).join(""),
+          };
+          overlay.innerHTML =
+            '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="listingTitle">' +
+            '<div class="card-body">' +
+            '<h3 id="listingTitle">Create listing</h3>' +
+            '<div class="subtitle">Approved sellers are assigned by default.</div>' +
+            '<form id="adminListingForm" novalidate style="display:grid;gap:14px;">' +
+            '<div class="field">' +
+            '<label for="adminListingName">Listing name <span class="req">*</span></label>' +
+            '<input type="text" id="adminListingName" required />' +
+            '<div class="error" id="adminListingNameError"></div>' +
+            "</div>" +
+            '<div class="form-row">' +
+            '<div class="field">' +
+            '<label for="adminListingSection">Section <span class="req">*</span></label>' +
+            '<select id="adminListingSection" required>' +
+            '<option value="">Select a section…</option>' +
+            sections.map(function (s) {
+              return '<option value="' + s.value + '">' + s.label + "</option>";
+            }).join("") +
+            "</select>" +
+            '<div class="error" id="adminListingSectionError"></div>' +
+            "</div>" +
+            '<div class="field" id="adminListingCategoryWrap">' +
+            '<select id="adminListingCategory" required>' +
+            '<option value="">Select a category…</option>' +
+            categoryOptions.fashion +
+            "</select>" +
+            '<div class="error" id="adminListingCategoryError"></div>' +
+            "</div>" +
+            "</div>" +
+            '<div class="field">' +
+            '<label for="adminListingDescription">Description</label>' +
+            '<textarea id="adminListingDescription"></textarea>' +
+            "</div>" +
+            '<div class="form-row">' +
+            '<div class="field">' +
+            '<label for="adminListingPrice">Price (GHS) <span class="req">*</span></label>' +
+            '<input type="number" id="adminListingPrice" min="0" step="1" required />' +
+            '<div class="error" id="adminListingPriceError"></div>' +
+            "</div>" +
+            '<div class="field">' +
+            '<label for="adminListingStock">Stock <span class="req">*</span></label>' +
+            '<input type="number" id="adminListingStock" min="0" step="1" required />' +
+            '<div class="error" id="adminListingStockError"></div>' +
+            "</div>" +
+            "</div>" +
+            '<div class="field">' +
+            '<label for="adminListingImage">Image URL <span class="text-subtle">(optional)</span></label>' +
+            '<input type="url" id="adminListingImage" placeholder="https://…/image.jpg" />' +
+            "</div>" +
+            '<div class="form-actions">' +
+            '<button type="button" class="btn btn-secondary" id="adminListingCancelBtn">Cancel</button>' +
+            '<button type="submit" class="btn btn-primary" id="adminListingSaveBtn">Create listing</button>' +
+            "</div>" +
+            "</form></div></div>";
+          document.body.appendChild(overlay);
+          var sectionSelect = overlay.querySelector("#adminListingSection");
+          var categoryWrap = overlay.querySelector("#adminListingCategoryWrap");
+          var categorySelect = overlay.querySelector("#adminListingCategory");
+          sectionSelect.addEventListener("change", function () {
+            var val = sectionSelect.value;
+            categorySelect.innerHTML = categoryOptions[val] || '<option value="">Select a category…</option>';
+          });
+          overlay.querySelector("#adminListingCancelBtn").addEventListener("click", function () { overlay.remove(); });
+          overlay.addEventListener("click", function (e) { if (e.target === overlay) overlay.remove(); });
+          overlay.querySelector("#adminListingForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            var name = overlay.querySelector("#adminListingName").value.trim();
+            var section = overlay.querySelector("#adminListingSection").value;
+            var category = overlay.querySelector("#adminListingCategory").value;
+            var description = overlay.querySelector("#adminListingDescription").value.trim();
+            var price = parseInt(overlay.querySelector("#adminListingPrice").value, 10);
+            var stock = parseInt(overlay.querySelector("#adminListingStock").value, 10);
+            var image = overlay.querySelector("#adminListingImage").value.trim();
+
+            var ok = true;
+            [overlay.querySelector("#adminListingNameError"), overlay.querySelector("#adminListingSectionError"), overlay.querySelector("#adminListingCategoryError"), overlay.querySelector("#adminListingPriceError"), overlay.querySelector("#adminListingStockError")].forEach(function (el) { if (el) el.textContent = ""; });
+            if (!name) overlay.querySelector("#adminListingNameError").textContent = "Listing name is required.";
+            if (!section) overlay.querySelector("#adminListingSectionError").textContent = "Section is required.";
+            if (!category) overlay.querySelector("#adminListingCategoryError").textContent = "Category is required.";
+            if (isNaN(price) || price < 0) overlay.querySelector("#adminListingPriceError").textContent = "Enter a valid price.";
+            if (isNaN(stock) || stock < 0) overlay.querySelector("#adminListingStockError").textContent = "Enter a valid stock.";
+            if (!name || !section || !category || isNaN(price) || price < 0 || isNaN(stock) || stock < 0) ok = false;
+            if (!ok) return;
+
+            var approvedSellers = window.Phyzel.listSellerProfiles().filter(function (p) { return p.isApproved && p.isActive; });
+            var sellerId = approvedSellers.length ? approvedSellers[0].id : null;
+
+            var payload = {
+              id: window.Phyzel.genId(),
+              sellerId: sellerId,
+              businessId: null,
+              section: section,
+              category: category,
+              name: name,
+              slug: window.Phyzel.slugify(name) + "-" + Date.now(),
+              description: description,
+              price: price,
+              currency: "GHS",
+              stock: stock,
+              stockStatus: stock <= 0 ? "out_of_stock" : stock < 5 ? "low_stock" : "in_stock",
+              images: image ? JSON.stringify([image]) : JSON.stringify([]),
+              tags: JSON.stringify([]),
+              isFeatured: false,
+              isHidden: false,
+              status: "active",
+              createdBy: user.user.id,
+              createdAt: window.Phyzel.nowIso(),
+              updatedAt: window.Phyzel.nowIso(),
+              publishedAt: window.Phyzel.nowIso(),
+              sample: false,
+            };
+            var btn = overlay.querySelector("#adminListingSaveBtn");
+            btn.disabled = true;
+            btn.textContent = "Creating…";
+            window.Phyzel.saveListing(payload).then(function () {
+              window.Phyzel.logAudit("listing_created", "listing", payload.id, "Listing created: " + payload.name, null, user.user);
+              window.Phyzel.toast("Listing created.");
+              overlay.remove();
+              window.Phyzel.renderAdminListingsPage(root);
+            }).catch(function (err) {
+              window.Phyzel.toast(err.message || "Could not create listing.", "error");
+              btn.disabled = false;
+              btn.textContent = "Create listing";
+            });
+          });
+        }
+        if (newBtn) newBtn.addEventListener("click", openNewListingForm);
+        if (newBtnEmpty) newBtnEmpty.addEventListener("click", openNewListingForm);
+
+        root.querySelectorAll(".archive-listing-btn").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var id = btn.getAttribute("data-id");
+            var l = window.Phyzel.listListings().find(function (x) { return x.id === id; });
+            if (!l) return;
+            window.Phyzel.confirm("Archive this listing? It will be hidden from customers.", "Archive listing", "danger").then(function (ok) {
+              if (!ok) return;
+              var updated = Object.assign({}, l, { status: "archived", isHidden: true, updatedAt: window.Phyzel.nowIso() });
+              window.Phyzel.saveListing(updated).then(function () {
+                window.Phyzel.logAudit("listing_archived", "listing", id, "Listing archived: " + l.name, null, user.user);
+                window.Phyzel.toast("Listing archived.");
+                window.Phyzel.renderAdminListingsPage(root);
+              }).catch(function (err) {
+                window.Phyzel.toast(err.message || "Could not archive listing.", "error");
+              });
+            });
+          });
+        });
+      };
+
+      if (document.readyState === "complete" || document.readyState === "interactive") {
+        window.Phyzel.renderAdminListingsPage(root);
+      } else {
+        document.addEventListener("DOMContentLoaded", function () {
+          window.Phyzel.renderAdminListingsPage(root);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
