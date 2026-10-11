@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Businesses — Admin — Phyzel Marketplace</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a href="index.html" class="brand" aria-label="Phyzel Marketplace home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z" /><path d="M10 9h4" /><path d="M10 13h4" /></svg>
+        Phyzel Marketplace
+        <small>Ghana-first</small>
+      </a>
+      <nav class="nav" id="mainNav">
+        <a href="index.html">Home</a>
+        <a href="fashion-beauty.html">Fashion &amp; Beauty</a>
+        <a href="food.html">Food</a>
+        <a href="general-trading.html">General Trading</a>
+        <a href="seller-application.html">Become a Seller</a>
+      </nav>
+      <div class="nav-actions">
+        <a href="cart.html" class="cart-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></svg>
+          Cart
+          <span class="count hidden" data-cart-count>0</span>
+        </a>
+        <template id="userMenuTpl">
+          <div class="user-menu">
+            <div class="avatar"><span data-user-initial>U</span></div>
+            <div>
+              <div class="name" data-user-name>User</div>
+              <div class="role" data-user-role>Customer</div>
+            </div>
+            <svg class="caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9" /></svg>
+            <div class="dropdown">
+              <a href="customer-dashboard.html" data-user-link>My account</a>
+              <a href="admin-dashboard.html">Admin dashboard</a>
+              <hr class="sep" />
+              <a href="login.html" data-action-logout>Sign out</a>
+            </div>
+          </div>
+        </template>
+        <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="wrap">
+      <div id="adminBusinessesRoot"></div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-brand">
+        <div class="brand">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z" /><path d="M10 9h4" /><path d="M10 13h4" /></svg>
+          Phyzel Marketplace
+        </div>
+        <p>A Ghana-first marketplace for fashion, food, and general trading.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Marketplace</h4>
+        <ul>
+          <li><a href="fashion-beauty.html">Fashion &amp; Beauty</a></li>
+          <li><a href="food.html">Food</a></li>
+          <li><a href="general-trading.html">General Trading</a></li>
+          <li><a href="seller-application.html">Become a seller</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Account</h4>
+        <ul>
+          <li><a href="login.html">Sign in</a></li>
+          <li><a href="register.html">Create account</a></li>
+          <li><a href="customer-dashboard.html">My account</a></li>
+          <li><a href="cart.html">Cart</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="#">Contact us</a></li>
+          <li><a href="#">Help center</a></li>
+          <li><a href="#">Delivery info</a></li>
+          <li><a href="#">Returns</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="footer-bottom">
+        <div>&copy; Phyzel Marketplace. All rights reserved.</div>
+        <div class="sample">Sample data for development only</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js" defer></script>
+  <script src="auth.js" defer></script>
+  <script src="admin.js" defer></script>
+  <script>
+    (function () {
+      "use strict";
+      var root = document.getElementById("adminBusinessesRoot");
+      if (!root) return;
+
+      window.Phyzel.renderAdminBusinessesPage = function (root) {
+        var user = window.Phyzel.currentUser();
+        if (!user || user.user.role !== "admin") {
+          root.innerHTML =
+            '<div class="card" style="max-width:560px;margin:40px auto;padding:30px;text-align:center;">' +
+            '<h2 style="font-size:1.2rem;font-weight:700;margin-bottom:6px;">Admin access required</h2>' +
+            '<p class="text-muted" style="margin-bottom:18px;">Only administrators can manage businesses.</p>' +
+            '<a href="index.html" class="btn btn-primary">Back to homepage</a>' +
+            "</div>";
+          return;
+        }
+
+        var businesses = window.Phyzel.listBusinesses();
+
+        var html =
+          '<nav aria-label="Breadcrumb" style="margin-bottom:18px;">' +
+          '<ol style="display:flex;flex-wrap:wrap;gap:6px 10px;font-size:0.85rem;color:var(--color-text-subtle);list-style:none;">' +
+          '<li><a href="index.html" style="color:var(--color-accent);">Home</a></li>' +
+          '<li><span aria-hidden="true">/</span></li>' +
+          '<li><a href="admin-dashboard.html" style="color:var(--color-accent);">Admin</a></li>' +
+          '<li><span aria-hidden="true">/</span></li>' +
+          '<li>Businesses</li>' +
+          "</ol></nav>";
+
+        html +=
+          '<div class="flex flex-between flex-wrap gap-3 mb-2">' +
+          '<div>' +
+          '<h1 class="page-title" style="font-size:1.4rem;">Businesses</h1>' +
+          '<p class="text-muted">Manage registered businesses and seller access.</p>' +
+          "</div>" +
+          '<button class="btn btn-primary" id="newBusinessBtn">Register business</button>' +
+          "</div>";
+
+        if (businesses.length === 0) {
+          html +=
+            '<div class="card" style="padding:40px 24px;text-align:center;">' +
+            '<div class="big-icon" style="margin:0 auto 12px;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg></div>' +
+            '<h3 style="font-size:1.05rem;font-weight:700;margin-bottom:4px;">No businesses registered</h3>' +
+            '<p class="text-muted" style="margin-bottom:16px;">Register businesses directly from this page.</p>' +
+            '<button class="btn btn-primary" id="newBusinessBtnEmpty">Register business</button>' +
+            "</div>";
+        } else {
+          html +=
+            '<div class="table-wrap"><table class="data"><thead><tr>' +
+            "<th>Business</th>" +
+            "<th>Category</th>" +
+            "<th>Location</th>" +
+            "<th>Contact</th>" +
+            "<th>Status</th>" +
+            "<th></th>" +
+            "</tr></thead><tbody>";
+          for (var i = 0; i < businesses.length; i++) {
+            var b = businesses[i];
+            var statusClass = b.status === "active" ? "status-active" :
+              b.status === "inactive" ? "status-inactive" : "status-suspended";
+            html +=
+              "<tr>" +
+              '<td><strong>' + window.Phyzel.escapeHtml(b.name) + "</strong>" +
+              '<div class="text-small text-subtle">' +
+              window.Phyzel.escapeHtml(b.contactName) +
+              "</div></td>" +
+              '<td>' +
+              window.Phyzel.escapeHtml(b.category || "—") +
+              "</td>" +
+              '<td>' +
+              window.Phyzel.escapeHtml(b.location || "—") +
+              "</td>" +
+              '<td>' +
+              window.Phyzel.escapeHtml(b.contactEmail || "—") +
+              (b.contactPhone ? "<br><span class='text-small text-subtle'>" + window.Phyzel.escapeHtml(b.contactPhone) + "</span>" : "") +
+              "</td>" +
+              '<td><span class="status ' + statusClass + '">' + b.status + "</span></td>" +
+              '<td>' +
+              '<button class="btn btn-ghost btn-small edit-business-btn" data-id="' + b.id + '">Edit</button> ' +
+              (b.status === "active" ? '<button class="btn btn-ghost btn-small suspend-business-btn" data-id="' + b.id + '">Suspend</button>' :
+                '<button class="btn btn-ghost btn-small activate-business-btn" data-id="' + b.id + '">Reactivate</button>') +
+              "</td>" +
+              "</tr>";
+          }
+          html += "</tbody></table></div>";
+        }
+
+        html +=
+          '<div class="alert alert-info" style="margin-top:18px;font-size:0.82rem;">' +
+          '<svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>' +
+          '<span>Use this to register official businesses. Seller applications are reviewed separately.</span>' +
+          "</div>";
+
+        root.innerHTML = html;
+
+        var newBtn = root.querySelector("#newBusinessBtn");
+        var newBtnEmpty = root.querySelector("#newBusinessBtnEmpty");
+        function openNewBusinessForm() {
+          var overlay = document.createElement("div");
+          overlay.className = "modal-backdrop";
+          overlay.innerHTML =
+            '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="bizTitle">' +
+            '<div class="card-body">' +
+            '<h3 id="bizTitle">Register a business</h3>' +
+            '<div class="subtitle">Administrators can register businesses directly.</div>' +
+            '<form id="newBusinessForm" novalidate style="display:grid;gap:14px;">' +
+            '<div class="field">' +
+            '<label for="bizName">Business name <span class="req">*</span></label>' +
+            '<input type="text" id="bizName" required />' +
+            '<div class="error" id="bizNameError"></div>' +
+            "</div>" +
+            '<div class="field">' +
+            '<label for="bizDescription">Description</label>' +
+            '<textarea id="bizDescription"></textarea>' +
+            "</div>" +
+            '<div class="form-row">' +
+            '<div class="field">' +
+            '<label for="bizContactName">Contact name <span class="req">*</span></label>' +
+            '<input type="text" id="bizContactName" required />' +
+            '<div class="error" id="bizContactNameError"></div>' +
+            "</div>" +
+            '<div class="field">' +
+            '<label for="bizContactEmail">Contact email <span class="req">*</span></label>' +
+            '<input type="email" id="bizContactEmail" required />' +
+            '<div class="error" id="bizContactEmailError"></div>' +
+            "</div>" +
+            "</div>" +
+            '<div class="form-row">' +
+            '<div class="field">' +
+            '<label for="bizContactPhone">Contact phone</label>' +
+            '<input type="tel" id="bizContactPhone" placeholder="+233 20 000 0000" />' +
+            "</div>" +
+            '<div class="field">' +
+            '<label for="bizCategory">Category</label>' +
+            '<input type="text" id="bizCategory" placeholder="Fashion & Beauty, Food, General Trading, etc." />' +
+            "</div>" +
+            "</div>" +
+            '<div class="form-row">' +
+            '<div class="field">' +
+            '<label for="bizLocation">Location</label>' +
+            '<input type="text" id="bizLocation" placeholder="Accra, Kumasi, Tamale…" />' +
+            "</div>" +
+            '<div class="field">' +
+            '<label for="bizStatus">Status</label>' +
+            '<select id="bizStatus">' +
+            '<option value="active">Active</option>' +
+            '<option value="inactive">Inactive</option>' +
+            "</select>" +
+            "</div>" +
+            "</div>" +
+            '<div class="form-actions">' +
+            '<button type="button" class="btn btn-secondary" id="bizCancelBtn">Cancel</button>' +
+            '<button type="submit" class="btn btn-primary" id="bizSaveBtn">Register business</button>' +
+            "</div>" +
+            "</form></div></div>";
+          document.body.appendChild(overlay);
+          overlay.querySelector("#bizCancelBtn").addEventListener("click", function () { overlay.remove(); });
+          overlay.addEventListener("click", function (e) { if (e.target === overlay) overlay.remove(); });
+          overlay.querySelector("#newBusinessForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            var name = overlay.querySelector("#bizName").value.trim();
+            var description = overlay.querySelector("#bizDescription").value.trim();
+            var contactName = overlay.querySelector("#bizContactName").value.trim();
+            var contactEmail = overlay.querySelector("#bizContactEmail").value.trim();
+            var contactPhone = overlay.querySelector("#bizContactPhone").value.trim();
+            var category = overlay.querySelector("#bizCategory").value.trim();
+            var location = overlay.querySelector("#bizLocation").value.trim();
+            var status = overlay.querySelector("#bizStatus").value;
+
+            var ok = true;
+            [overlay.querySelector("#bizNameError"), overlay.querySelector("#bizContactNameError"), overlay.querySelector("#bizContactEmailError")].forEach(function (el) { if (el) el.textContent = ""; });
+            if (!name) overlay.querySelector("#bizNameError").textContent = "Business name is required.";
+            if (!contactName) overlay.querySelector("#bizContactNameError").textContent = "Contact name is required.";
+            if (!contactEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) overlay.querySelector("#bizContactEmailError").textContent = "Enter a valid email.";
+            if (!name || !contactName || !contactEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) ok = false;
+            if (!ok) return;
+
+            var btn = overlay.querySelector("#bizSaveBtn");
+            btn.disabled = true;
+            btn.textContent = "Saving…";
+            window.Phyzel.saveBusiness({
+              id: window.Phyzel.genId(),
+              name: name,
+              description: description,
+              contactName: contactName,
+              contactEmail: contactEmail,
+              contactPhone: contactPhone,
+              category: category,
+              location: location,
+              logoRef: null,
+              status: status,
+              website: "",
+              socialRefs: "",
+              createdBy: user.user.id,
+              createdAt: window.Phyzel.nowIso(),
+              updatedAt: window.Phyzel.nowIso(),
+              sample: false,
+            }).then(function () {
+              window.Phyzel.logAudit("business_created", "business", "new", "Business created: " + name, null, user.user);
+              window.Phyzel.toast("Business registered.");
+              overlay.remove();
+              window.Phyzel.renderAdminBusinessesPage(root);
+            }).catch(function (err) {
+              window.Phyzel.toast(err.message || "Could not register business.", "error");
+              btn.disabled = false;
+              btn.textContent = "Register business";
+            });
+          });
+        }
+        if (newBtn) newBtn.addEventListener("click", openNewBusinessForm);
+        if (newBtnEmpty) newBtnEmpty.addEventListener("click", openNewBusinessForm);
+
+        root.querySelectorAll(".edit-business-btn").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var id = btn.getAttribute("data-id");
+            var b = window.Phyzel.listBusinesses().find(function (x) { return x.id === id; });
+            if (!b) return;
+            var overlay = document.createElement("div");
+            overlay.className = "modal-backdrop";
+            overlay.innerHTML =
+              '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="bizTitle">' +
+              '<div class="card-body">' +
+              '<h3 id="bizTitle">Edit business</h3>' +
+              '<div class="subtitle">Update the business details.</div>' +
+              '<form id="editBusinessForm" novalidate style="display:grid;gap:14px;">' +
+              '<input type="hidden" id="editBizId" value="' + b.id + '" />' +
+              '<div class="field">' +
+              '<label for="editBizName">Business name <span class="req">*</span></label>' +
+              '<input type="text" id="editBizName" value="' + window.Phyzel.escapeAttr(b.name) + '" required />' +
+              '<div class="error" id="editBizNameError"></div>' +
+              "</div>" +
+              '<div class="field">' +
+              '<label for="editBizDescription">Description</label>' +
+              '<textarea id="editBizDescription">' + window.Phyzel.escapeHtml(b.description || "") + "</textarea>" +
+              "</div>" +
+              '<div class="form-row">' +
+              '<div class="field">' +
+              '<label for="editBizContactName">Contact name <span class="req">*</span></label>' +
+              '<input type="text" id="editBizContactName" value="' + window.Phyzel.escapeAttr(b.contactName) + '" required />' +
+              '<div class="error" id="editBizContactNameError"></div>' +
+              "</div>" +
+              '<div class="field">' +
+              '<label for="editBizContactEmail">Contact email <span class="req">*</span></label>' +
+              '<input type="email" id="editBizContactEmail" value="' + window.Phyzel.escapeAttr(b.contactEmail) + '" required />' +
+              '<div class="error" id="editBizContactEmailError"></div>' +
+              "</div>" +
+              "</div>" +
+              '<div class="form-row">' +
+              '<div class="field">' +
+              '<label for="editBizContactPhone">Contact phone</label>' +
+              '<input type="tel" id="editBizContactPhone" value="' + window.Phyzel.escapeAttr(b.contactPhone || "") + '" placeholder="+233 20 000 0000" />' +
+              "</div>" +
+              '<div class="field">' +
+              '<label for="editBizCategory">Category</label>' +
+              '<input type="text" id="editBizCategory" value="' + window.Phyzel.escapeAttr(b.category || "") + '" placeholder="Fashion & Beauty, Food, General Trading, etc." />' +
+              "</div>" +
+              "</div>" +
+              '<div class="form-row">' +
+              '<div class="field">' +
+              '<label for="editBizLocation">Location</label>' +
+              '<input type="text" id="editBizLocation" value="' + window.Phyzel.escapeAttr(b.location || "") + '" placeholder="Accra, Kumasi, Tamale…" />' +
+              "</div>" +
+              '<div class="field">' +
+              '<label for="editBizStatus">Status</label>' +
+              '<select id="editBizStatus">' +
+              '<option value="active" ' + (b.status === "active" ? "selected" : "") + '>Active</option>' +
+              '<option value="inactive" ' + (b.status === "inactive" ? "selected" : "") + '>Inactive</option>' +
+              '<option value="suspended" ' + (b.status === "suspended" ? "selected" : "") + '>Suspended</option>' +
+              "</select>" +
+              "</div>" +
+              "</div>" +
+              '<div class="form-actions">' +
+              '<button type="button" class="btn btn-secondary" id="editBizCancelBtn">Cancel</button>' +
+              '<button type="submit" class="btn btn-primary" id="editBizSaveBtn">Save changes</button>' +
+              "</div>" +
+              "</form></div></div>";
+            document.body.appendChild(overlay);
+            overlay.querySelector("#editBizCancelBtn").addEventListener("click", function () { overlay.remove(); });
+            overlay.addEventListener("click", function (e) { if (e.target === overlay) overlay.remove(); });
+            overlay.querySelector("#editBusinessForm").addEventListener("submit", function (e) {
+              e.preventDefault();
+              var name = overlay.querySelector("#editBizName").value.trim();
+              var description = overlay.querySelector("#editBizDescription").value.trim();
+              var contactName = overlay.querySelector("#editBizContactName").value.trim();
+              var contactEmail = overlay.querySelector("#editBizContactEmail").value.trim();
+              var contactPhone = overlay.querySelector("#editBizContactPhone").value.trim();
+              var category = overlay.querySelector("#editBizCategory").value.trim();
+              var location = overlay.querySelector("#editBizLocation").value.trim();
+              var status = overlay.querySelector("#editBizStatus").value;
+
+              var ok = true;
+              [overlay.querySelector("#editBizNameError"), overlay.querySelector("#editBizContactNameError"), overlay.querySelector("#editBizContactEmailError")].forEach(function (el) { if (el) el.textContent = ""; });
+              if (!name) overlay.querySelector("#editBizNameError").textContent = "Business name is required.";
+              if (!contactName) overlay.querySelector("#editBizContactNameError").textContent = "Contact name is required.";
+              if (!contactEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) overlay.querySelector("#editBizContactEmailError").textContent = "Enter a valid email.";
+              if (!name || !contactName || !contactEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) ok = false;
+              if (!ok) return;
+
+              var btn = overlay.querySelector("#editBizSaveBtn");
+              btn.disabled = true;
+              btn.textContent = "Saving…";
+              var updates = {
+                id: b.id,
+                name: name,
+                description: description,
+                contactName: contactName,
+                contactEmail: contactEmail,
+                contactPhone: contactPhone,
+                category: category,
+                location: location,
+                status: status,
+                updatedAt: window.Phyzel.nowIso(),
+              };
+              window.Phyzel.saveBusiness(updates).then(function () {
+                window.Phyzel.logAudit("business_updated", "business", id, "Business updated: " + name, null, user.user);
+                window.Phyzel.toast("Business updated.");
+                overlay.remove();
+                window.Phyzel.renderAdminBusinessesPage(root);
+              }).catch(function (err) {
+                window.Phyzel.toast(err.message || "Could not update business.", "error");
+                btn.disabled = false;
+                btn.textContent = "Save changes";
+              });
+            });
+          });
+        });
+
+        root.querySelectorAll(".suspend-business-btn").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var id = btn.getAttribute("data-id");
+            var b = window.Phyzel.listBusinesses().find(function (x) { return x.id === id; });
+            if (!b) return;
+            window.Phyzel.confirm("Suspend this business? It will no longer be active.", "Suspend business", "danger").then(function (ok) {
+              if (!ok) return;
+              var updated = Object.assign({}, b, { status: "inactive", updatedAt: window.Phyzel.nowIso() });
+              window.Phyzel.saveBusiness(updated).then(function () {
+                window.Phyzel.logAudit("business_suspended", "business", id, "Business suspended: " + b.name, null, user.user);
+                window.Phyzel.toast("Business suspended.");
+                window.Phyzel.renderAdminBusinessesPage(root);
+              }).catch(function (err) {
+                window.Phyzel.toast(err.message || "Could not suspend business.", "error");
+              });
+            });
+          });
+        });
+
+        root.querySelectorAll(".activate-business-btn").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var id = btn.getAttribute("data-id");
+            var b = window.Phyzel.listBusinesses().find(function (x) { return x.id === id; });
+            if (!b) return;
+            window.Phyzel.confirm("Reactivate this business?", "Reactivate business", "primary").then(function (ok) {
+              if (!ok) return;
+              var updated = Object.assign({}, b, { status: "active", updatedAt: window.Phyzel.nowIso() });
+              window.Phyzel.saveBusiness(updated).then(function () {
+                window.Phyzel.logAudit("business_activated", "business", id, "Business reactivated: " + b.name, null, user.user);
+                window.Phyzel.toast("Business reactivated.");
+                window.Phyzel.renderAdminBusinessesPage(root);
+              }).catch(function (err) {
+                window.Phyzel.toast(err.message || "Could not reactivate business.", "error");
+              });
+            });
+          });
+        });
+      };
+
+      if (document.readyState === "complete" || document.readyState === "interactive") {
+        window.Phyzel.renderAdminBusinessesPage(root);
+      } else {
+        document.addEventListener("DOMContentLoaded", function () {
+          window.Phyzel.renderAdminBusinessesPage(root);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Settings — Admin — Phyzel Marketplace</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a href="index.html" class="brand" aria-label="Phyzel Marketplace home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z" /><path d="M10 9h4" /><path d="M10 13h4" /></svg>
+        Phyzel Marketplace
+        <small>Ghana-first</small>
+      </a>
+      <nav class="nav" id="mainNav">
+        <a href="index.html">Home</a>
+        <a href="fashion-beauty.html">Fashion &amp; Beauty</a>
+        <a href="food.html">Food</a>
+        <a href="general-trading.html">General Trading</a>
+        <a href="seller-application.html">Become a Seller</a>
+      </nav>
+      <div class="nav-actions">
+        <a href="cart.html" class="cart-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></svg>
+          Cart
+          <span class="count hidden" data-cart-count>0</span>
+        </a>
+        <template id="userMenuTpl">
+          <div class="user-menu">
+            <div class="avatar"><span data-user-initial>U</span></div>
+            <div>
+              <div class="name" data-user-name>User</div>
+              <div class="role" data-user-role>Customer</div>
+            </div>
+            <svg class="caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9" /></svg>
+            <div class="dropdown">
+              <a href="customer-dashboard.html" data-user-link>My account</a>
+              <a href="admin-dashboard.html">Admin dashboard</a>
+              <hr class="sep" />
+              <a href="login.html" data-action-logout>Sign out</a>
+            </div>
+          </div>
+        </template>
+        <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="wrap">
+      <div id="adminSettingsRoot"></div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-brand">
+        <div class="brand">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z" /><path d="M10 9h4" /><path d="M10 13h4" /></svg>
+          Phyzel Marketplace
+        </div>
+        <p>A Ghana-first marketplace for fashion, food, and general trading.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Marketplace</h4>
+        <ul>
+          <li><a href="fashion-beauty.html">Fashion &amp; Beauty</a></li>
+          <li><a href="food.html">Food</a></li>
+          <li><a href="general-trading.html">General Trading</a></li>
+          <li><a href="seller-application.html">Become a seller</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Account</h4>
+        <ul>
+          <li><a href="login.html">Sign in</a></li>
+          <li><a href="register.html">Create account</a></li>
+          <li><a href="customer-dashboard.html">My account</a></li>
+          <li><a href="cart.html">Cart</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="#">Contact us</a></li>
+          <li><a href="#">Help center</a></li>
+          <li><a href="#">Delivery info</a></li>
+          <li><a href="#">Returns</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="footer-bottom">
+        <div>&copy; Phyzel Marketplace. All rights reserved.</div>
+        <div class="sample">Sample data for development only</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js" defer></script>
+  <script src="auth.js" defer></script>
+  <script src="admin.js" defer></script>
+  <script>
+    (function () {
+      "use strict";
+      var root = document.getElementById("adminSettingsRoot");
+      if (!root) return;
+
+      window.Phyzel.renderAdminSettingsPage = function (root) {
+        var user = window.Phyzel.currentUser();
+        if (!user || user.user.role !== "admin") {
+          root.innerHTML =
+            '<div class="card" style="max-width:560px;margin:40px auto;padding:30px;text-align:center;">' +
+            '<h2 style="font-size:1.2rem;font-weight:700;margin-bottom:6px;">Admin access required</h2>' +
+            '<p class="text-muted" style="margin-bottom:18px;">Only administrators can change marketplace settings.</p>' +
+            '<a href="index.html" class="btn btn-primary">Back to homepage</a>' +
+            "</div>";
+          return;
+        }
+
+        var settings = window.Phyzel.getSettings();
+
+        var html =
+          '<nav aria-label="Breadcrumb" style="margin-bottom:18px;">' +
+          '<ol style="display:flex;flex-wrap:wrap;gap:6px 10px;font-size:0.85rem;color:var(--color-text-subtle);list-style:none;">' +
+          '<li><a href="index.html" style="color:var(--color-accent);">Home</a></li>' +
+          '<li><span aria-hidden="true">/</span></li>' +
+          '<li><a href="admin-dashboard.html" style="color:var(--color-accent);">Admin</a></li>' +
+          '<li><span aria-hidden="true">/</span></li>' +
+          '<li>Settings</li>' +
+          "</ol></nav>";
+
+        html +=
+          '<div class="card" style="padding:24px;max-width:720px;margin:0 auto;">' +
+          '<h1 class="page-title" style="font-size:1.4rem;margin-bottom:6px;">Marketplace settings</h1>' +
+          '<p class="text-muted" style="margin-bottom:22px;">Commission rates and delivery fees are stored locally for this browser. They apply to new orders created in this session.</p>';
+
+        html +=
+          '<form id="settingsForm" novalidate style="display:grid;gap:18px;">' +
+          '<h3 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-subtle);font-weight:700;margin:0;">Commission</h3>' +
+          '<div class="field">' +
+          '<label for="settingsCommission">Marketplace commission rate</label>' +
+          '<div style="display:flex;align-items:center;gap:12px;">' +
+          '<input type="number" id="settingsCommission" min="0" max="0.5" step="0.01" value="' +
+          (settings.commissionRate || 0.05) +
+          '" style="flex:1;" />' +
+          '<span class="text-small text-subtle">(' +
+          Math.round((settings.commissionRate || 0.05) * 100) +
+          "%)</span>" +
+          "</div>" +
+          '<div class="hint">Percentage of the order subtotal kept by Phyzel Marketplace.</div>' +
+          '<div class="error" id="settingsCommissionError"></div>' +
+          "</div>";
+
+        html +=
+          '<h3 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-subtle);font-weight:700;margin:0 0 12px;">Delivery fees (GHS)</h3>' +
+          '<div class="grid-2">' +
+          '<div class="field">' +
+          '<label for="settingsFashionDelivery">Fashion & Beauty</label>' +
+          '<input type="number" id="settingsFashionDelivery" min="0" step="1" value="' +
+          (settings.deliveryFeeFashion || 25) +
+          '" />' +
+          '<div class="error" id="settingsFashionDeliveryError"></div>' +
+          "</div>" +
+          '<div class="field">' +
+          '<label for="settingsFoodDelivery">Food</label>' +
+          '<input type="number" id="settingsFoodDelivery" min="0" step="1" value="' +
+          (settings.deliveryFeeFood || 25) +
+          '" />' +
+          '<div class="error" id="settingsFoodDeliveryError"></div>' +
+          "</div>" +
+          "</div>" +
+          '<div class="grid-2">' +
+          '<div class="field">' +
+          '<label for="settingsTradingDelivery">Trading</label>' +
+          '<input type="number" id="settingsTradingDelivery" min="0" step="1" value="' +
+          (settings.deliveryFeeTrading || 35) +
+          '" />' +
+          '<div class="error" id="settingsTradingDeliveryError"></div>' +
+          "</div>" +
+          "</div>";
+
+        html +=
+          '<div class="form-actions" style="margin-top:6px;">' +
+          '<button type="submit" class="btn btn-primary" id="saveSettingsBtn">Save settings</button>' +
+          "</div>" +
+          "</form>";
+
+        html +=
+          '<div class="alert alert-info" style="margin-top:18px;font-size:0.82rem;">' +
+          '<svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>' +
+          '<span>These settings are stored locally in this browser. A server-backed setup will use a shared configuration instead.</span>' +
+          "</div>";
+
+        html +=
+          '<h3 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-subtle);font-weight:700;margin:26px 0 12px;">Payment provider</h3>' +
+          '<div class="alert alert-warning" style="font-size:0.88rem;">' +
+          '<svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>' +
+          '<span>Whop is not configured in this client-side MVP. Orders remain pending until a verified payment is received elsewhere.</span>' +
+          "</div>" +
+          '<div class="text-small text-subtle" style="margin-top:10px;">To enable real checkout, configure Whop on a server endpoint and connect the client to that endpoint.</div>';
+
+        html += "</div>";
+
+        root.innerHTML = html;
+
+        var form = root.querySelector("#settingsForm");
+        if (!form) return;
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+          var commission = parseFloat(form.querySelector("#settingsCommission").value);
+          var fashion = parseInt(form.querySelector("#settingsFashionDelivery").value, 10);
+          var food = parseInt(form.querySelector("#settingsFoodDelivery").value, 10);
+          var trading = parseInt(form.querySelector("#settingsTradingDelivery").value, 10);
+
+          var ok = true;
+          var errs = [
+            form.querySelector("#settingsCommissionError"),
+            form.querySelector("#settingsFashionDeliveryError"),
+            form.querySelector("#settingsFoodDeliveryError"),
+            form.querySelector("#settingsTradingDeliveryError"),
+          ];
+          errs.forEach(function (el) { if (el) el.textContent = ""; });
+
+          if (isNaN(commission) || commission < 0 || commission > 0.5) {
+            if (errs[0]) errs[0].textContent = "Commission must be between 0% and 50%.";
+            ok = false;
+          }
+          if (isNaN(fashion) || fashion < 0) { if (errs[1]) errs[1].textContent = "Enter a valid fee."; ok = false; }
+          if (isNaN(food) || food < 0) { if (errs[2]) errs[2].textContent = "Enter a valid fee."; ok = false; }
+          if (isNaN(trading) || trading < 0) { if (errs[3]) errs[3].textContent = "Enter a valid fee."; ok = false; }
+          if (!ok) return;
+
+          var btn = form.querySelector("#saveSettingsBtn");
+          btn.disabled = true;
+          btn.textContent = "Saving…";
+          window.Phyzel.saveSettings({
+            commissionRate: commission,
+            deliveryFeeFashion: fashion,
+            deliveryFeeFood: food,
+            deliveryFeeTrading: trading,
+          }).then(function () {
+            window.Phyzel.logAudit("settings_updated", "settings", "commission", "Commission rate updated to " + Math.round(commission * 100) + "%", null, user.user);
+            window.Phyzel.toast("Settings saved.");
+            btn.disabled = false;
+            btn.textContent = "Save settings";
+          }).catch(function (err) {
+            window.Phyzel.toast(err.message || "Could not save settings.", "error");
+            btn.disabled = false;
+            btn.textContent = "Save settings";
+          });
+        });
+      };
+
+      if (document.readyState === "complete" || document.readyState === "interactive") {
+        window.Phyzel.renderAdminSettingsPage(root);
+      } else {
+        document.addEventListener("DOMContentLoaded", function () {
+          window.Phyzel.renderAdminSettingsPage(root);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
