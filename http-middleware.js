@@ -1,0 +1,23 @@
+function json(res, status, payload) {
+  res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
+  res.end(JSON.stringify(payload));
+}
+
+function requireUser(req, res) {
+  if (!req.user) {
+    json(res, 401, { error: 'Sign in required' });
+    return false;
+  }
+  return true;
+}
+
+function requireRole(req, res, roles) {
+  if (!requireUser(req, res)) return false;
+  if (!roles.includes(req.user.role)) {
+    json(res, 403, { error: 'You do not have permission for this action' });
+    return false;
+  }
+  return true;
+}
+
+module.exports = { json, requireUser, requireRole };
