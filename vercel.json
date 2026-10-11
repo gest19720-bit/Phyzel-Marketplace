@@ -1,5 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "outputDirectory": "."
+  "outputDirectory": ".",
+  "functions": {
+    "api/[...path].js": {
+      "includeFiles": ["marketplace.sqlite"]
+    }
+  }
 }
